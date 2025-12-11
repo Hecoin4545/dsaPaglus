@@ -7,6 +7,11 @@ async function handleUserSignup(req,res){
         return res.status(404).json({"success":false , "msg":"Please provide all the inputs"});
     }
     
+    const findUser = await User.findOne({email});
+    if(findUser){
+        return res.status(404).json({"success":false , "msg":"User already exists"})
+    }
+
     const salt = bcrypt.genSaltSync(10);
     const hashPassword = bcrypt.hashSync(password, salt);
 
@@ -27,6 +32,17 @@ async function handleUserSignin(req,res){
 
     if(!email || !password){
         return res.status(404).json({"success":false , "msg":"Please provide all the inputs"})
+    }
+
+    const findUser = await User.findOne(email);
+
+    if(!findUser){
+        return res.status(404).json({"success":false , "msg":"User doesnot exists"});
+    }
+    const checkPassword = await bcrypt.compare(User.password , password);
+
+    if(!checkPassword){
+        return res.status(404).json({'success':false , "msg":"Invalid Credentials"})
     }
 }
 
